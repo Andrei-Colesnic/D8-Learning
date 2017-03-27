@@ -5,3 +5,10 @@ firstpage.content:
     _title: 'First Page'
   requirements:
     _permission: 'access content'
+sitename.form:
+ path: '/sitename'
+ defaults:
+   _title: 'Sitename form'
+   _form: '\Drupal\firstpage\Form\SitenameForm'
+ requirements:
+   _permission: 'administer firstpage'
