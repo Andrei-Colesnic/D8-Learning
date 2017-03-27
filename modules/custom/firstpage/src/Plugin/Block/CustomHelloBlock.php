@@ -12,11 +12,11 @@ use Drupal\Core\Block\BlockBase;
  *
  * @Block(
  *   id = "hello_block",
- *   admin_label = @Translation("Hello block1"),
- *   category = @Translation("Custom hello block1")
+ *   admin_label = @Translation("Hello block"),
+ *   category = @Translation("Custom hello block")
  * )
  */
-class HelloBlock1 extends BlockBase {
+class CustomHelloBlock extends BlockBase {
   /**
    * {@inheritdoc}
    */
@@ -26,6 +26,5 @@ class HelloBlock1 extends BlockBase {
       '#type' => 'markup',
       '#markup' => "Greetings {$name}" ,
     );
-    $a ='sdfsdfsdg';
   }
 }
