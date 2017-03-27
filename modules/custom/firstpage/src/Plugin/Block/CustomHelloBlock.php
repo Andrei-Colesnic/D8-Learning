@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\firstpage\Plugin\Block\HelloBlock1
+ * Contains \Drupal\firstpage\Plugin\Block\CustomHelloBlock
  */
 namespace Drupal\firstpage\Plugin\Block;
 use Drupal\Core\Block\BlockBase;
