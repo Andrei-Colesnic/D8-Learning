@@ -1,0 +1,7 @@
+moderation.form:
+ path: '/moderation'
+ defaults:
+   _title: 'Moderation form'
+   _form: '\Drupal\node_moderation\Form\ModerationForm'
+ requirements:
+   _permission: 'administer node_moderation'
