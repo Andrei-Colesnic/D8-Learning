@@ -1,0 +1,6 @@
+name: Node Moderation module
+description: Creates a page showing "Node Moderation Form".
+package: Custom
+type: module
+version: 1.0
+core: 8.x
