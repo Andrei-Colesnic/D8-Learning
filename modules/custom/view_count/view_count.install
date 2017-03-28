@@ -1,0 +1,24 @@
+<?php
+
+function view_count_schema() {
+  $schema['view_count'] = array(
+    'fields' => array(
+      'nid'       => array(
+        'type'     => 'int',
+        'not null' => TRUE,
+      ),
+      'timestamp' => array(
+        'type'     => 'int',
+        'length'   => 40,
+        'not null' => TRUE,
+      ),
+      'uid'       => array(
+        'type'     => 'int',
+        'length'   => 40,
+        'not null' => TRUE,
+      ),
+    ),
+  );
+
+  return $schema;
+}
