@@ -12,7 +12,7 @@ use Drupal\Component\Utility\UrlHelper;
 use Drupal\node\Entity\Node;
 
 /**
- * Sitename change form.
+ * Moderation change form.
  */
 class ModerationForm extends FormBase {
   /**
@@ -44,8 +44,8 @@ class ModerationForm extends FormBase {
       '#type'    => 'select',
       '#title'   => t('Status'),
       '#options' => [
-        '1' => 'Published',
-        '0' => 'Unpublished',
+        NODE_PUBLISHED => 'Published',
+        NODE_NOT_PUBLISHED => 'Unpublished',
       ],
     );
     $form['sticky'] = array(
@@ -53,19 +53,19 @@ class ModerationForm extends FormBase {
       '#type'    => 'select',
       '#title'   => t('Sticky'),
       '#options' => [
-        '1' => 'Sticky',
-        '0' => 'Non Sticky',
+        NODE_STICKY => 'Sticky',
+        NODE_NOT_STICKY => 'Non Sticky',
       ],
     );
     $form['update'] = array(
       '#type'   => 'submit',
       '#value'  => t('Update'),
-      '#submit' => array('::UpdateSubmitHandler'),
+      '#submit' => array('::updateSubmitHandler'),
     );
     $form['delete'] = array(
       '#type'   => 'submit',
       '#value'  => t('Delete'),
-      '#submit' => array('::DeleteSubmitHandler'),
+      '#submit' => array('::deleteSubmitHandler'),
     );
     return $form;
   }
@@ -74,7 +74,7 @@ class ModerationForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
+//  We're not using this method and it's purely implemented as required by interface
   }
 
   /**
@@ -85,25 +85,12 @@ class ModerationForm extends FormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  public function UpdateSubmitHandler(array &$form, FormStateInterface $form_state) {
+  public function updateSubmitHandler(array &$form, FormStateInterface $form_state) {
     $node_id = $form_state->getValue('article_title');
     $node = Node::load($node_id);
-    if ($form_state->getValue('sticky') == 1) {
-      $node->setSticky(NODE_STICKY);
-      $node->save();
-    }
-    else {
-      $node->setSticky(NODE_NOT_STICKY);
-      $node->save();
-    }
-    if ($form_state->getValue('status') == 1) {
-      $node->setPublished(NODE_PUBLISHED);
-      $node->save();
-    }
-    else {
-      $node->setPublished(NODE_NOT_PUBLISHED);
-      $node->save();
-    }
+    $node->setSticky($form_state->getValue('sticky'));
+    $node->setPublished($form_state->getValue('status'));
+    $node->save();
   }
 
   /**
@@ -114,9 +101,8 @@ class ModerationForm extends FormBase {
    * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The current state of the form.
    */
-  public function DeleteSubmitHandler(array &$form, FormStateInterface $form_state) {
+  public function deleteSubmitHandler(array &$form, FormStateInterface $form_state) {
     $node_id = $form_state->getValue('article_title');
-    $node = Node::load($node_id);
-    $node->delete();
+    $node = Node::load($node_id)->delete();
   }
 }
