@@ -1,6 +1,0 @@
-name: FirstPage module
-description: Creates a page showing "FirstPage".
-package: Custom
-type: module
-version: 1.0
-core: 8.x
