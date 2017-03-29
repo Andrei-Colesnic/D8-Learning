@@ -1,0 +1,3 @@
+services:
+  view_count.get_view_data_service:
+    class: Drupal\view_count\GetViewDataService

@@ -1,53 +1,35 @@
 <?php
 
-function view_count_preprocess_node(&$variables) {
+use Drupal\Component\Utility\UrlHelper;
+use Drupal\node\Entity\Node;
+use Drupal\view_count\GetViewDataService;
 
-  // Get data for insert in db.
-  $timestamp = time();
-  $yesterday = strtotime('-1 day');
-  $nid = \Drupal::routeMatch()->getRawParameter('node');
-  $uid = \Drupal::currentUser()->id();
+function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  if ($view_mode === 'full') {
 
-  // Get all page views.
-  $query = \Drupal::database()->select('view_count', 'vc');
-  $query->fields('vc', ['uid', 'timestamp']);
-  $query->condition('vc.nid', $nid);
-  $query->orderBy('timestamp', 'DESC');
-  $query->range(0, 1);
-  $last_view = $query->execute()->fetchAssoc();
+    // Get data view count report input.
+    $nid = \Drupal::routeMatch()->getRawParameter('node');
 
-  // Get all views for node.
-  $query = \Drupal::database()->select('view_count', 'vc');
-  $query->fields('vc', ['uid', 'timestamp']);
-  $query->condition('vc.nid', $nid);
-  $query_result = $query->countQuery()->execute();
-  $all_views = $query_result->fetchField();
+    $view_results= new GetViewDataService;
+    $last_view = $view_results->getLastViewData($nid);
+    $all_views = $view_results->getAllViewData($nid);
+    $today_views = $view_results->getTodayViewData($nid);
+    $view_results->setViewData($nid);
 
-  // Get page views for last 24 hours.
-  $query = \Drupal::database()->select('view_count', 'vc');
-  $query->fields('vc', ['uid', 'timestamp']);
-  $query->condition('vc.nid', $nid);
-  $query->condition('vc.timestamp', $yesterday, '>');
-  $query_result = $query->countQuery()->execute();
-  $today_views = $query_result->fetchField();
+    // Gather data for report on node page.
+    $user_name = User::load($last_view['uid'])->getUsername();
+    $access_time = date('m-d-Y', $last_view['timestamp']);
 
-  // Insert data into db.
-  $query = \Drupal::database()->insert('view_count')
-    ->fields(array('nid', 'timestamp', 'uid'))
-    ->values([$nid, $timestamp, $uid])
-    ->execute();
-
-  // Gather data for report on node page.
-  $user_name = \Drupal\user\Entity\User::load($last_view->uid)->getUsername();
-  $access_time = date('m-d-Y', $last_view->timestamp);
-
-  // Add fields to node page.
-  $variables['content']['view_count'] = [
-    '#markup' => t("Number of views: {$today_views} / {$all_views} total"),
-    '#weight' => -2,
-  ];
-  $variables['content']['last_views'] = [
-    '#markup' => t("Last viewed by: {$user_name} at {$access_time}"),
-    '#weight' => -1,
-  ];
+    // Add fields to node page.
+    $build['all_views'] = [
+      '#type' => 'markup',
+      '#markup' => t("Number of views: {$today_views} / {$all_views} total"),
+      '#weight' => -2 ,
+    ];
+    $build['last_view'] = [
+      '#type' => 'markup',
+      '#markup' => t("Last viewed by: {$user_name} at {$access_time}"),
+      '#weight' => -1 ,
+    ];
+  }
 }
