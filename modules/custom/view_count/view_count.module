@@ -1,0 +1,51 @@
+<?php
+
+use Drupal\Component\Utility\UrlHelper;
+use Drupal\node\Entity\Node;
+use Drupal\user\Entity\User;
+use Drupal\view_count\ViewsCountService;
+
+/**
+ * @param array $build
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ * @param $view_mode
+ */
+function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+  if ($view_mode === 'full') {
+    $nid = \Drupal::routeMatch()->getRawParameter('node');
+
+    // Get data for report on node.
+    $views_count_service = \Drupal::service('view_count.get_view_data_service');
+    $last_view = $views_count_service->getLastViewData($nid);
+    $all_views = $views_count_service->getAllViewData($nid);
+    $today_views = $views_count_service->getTodayViewData($nid);
+
+    // Insert data into storage, if not anonymous user.
+    if (!\Drupal::currentUser()->isAnonymous()) {
+      $uid = \Drupal::currentUser()->id();
+      $views_count_service->setViewData($nid, $uid);
+    }
+
+    // Gather data for report on node page.
+    $user_name = User::load($last_view['uid'])->getUsername();
+    $access_time = date('m-d-Y', $last_view['timestamp']);
+
+    // Add fields to node page.
+    $build['all_views'] = [
+      '#type'   => 'markup',
+      '#markup' => t('Number of views: @today_views today / @all_views total',
+        array('@today_views' => $today_views, '@all_views' => $all_views)),
+      '#weight' => -2,
+    ];
+    $build['last_view'] = [
+      '#type'   => 'markup',
+      '#markup' => t('Last viewed by: @user_name at @access_time',
+        array('@user_name' => $user_name, '@access_time' => $access_time)),
+      '#weight' => -1,
+    ];
+
+    // Disable caching for full node view.
+    $build['#cache']['max-age'] = 0;
+  }
+}
