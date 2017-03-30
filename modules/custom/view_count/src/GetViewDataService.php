@@ -12,8 +12,6 @@ use Drupal\Core\Database\Connection;
 
 class GetViewDataService {
 
-  protected $all_views;
-  protected $page_view;
   protected $connection;
 
 
@@ -35,9 +33,7 @@ class GetViewDataService {
     $query->condition('vc.nid', $nid);
     $query->condition('vc.timestamp', $yesterday, '>');
     $query_result = $query->countQuery()->execute();
-    $today_views = $query_result->fetchField();
-
-    return $today_views;
+    return $query_result->fetchField();
   }
 
   /**
@@ -50,9 +46,7 @@ class GetViewDataService {
     $query->condition('vc.nid', $nid);
     $query->orderBy('timestamp', 'DESC');
     $query->range(0, 1);
-    $page_view = $query->execute()->fetchAssoc();
-
-    return $page_view;
+    return $query->execute()->fetchAssoc();
   }
 
   /**
@@ -64,19 +58,26 @@ class GetViewDataService {
     $query->fields('vc', ['uid', 'timestamp']);
     $query->condition('vc.nid', $nid);
     $query_result = $query->countQuery()->execute();
-    $all_views = $query_result->fetchField();
-
-    return $all_views;
+    return $query_result->fetchField();
   }
 
   /**
    * Write current view to db.
    */
   public function setViewData($nid, $uid) {
-    $timestamp = time();
-    $query = $this->connection->insert('view_count')
-      ->fields(array('nid', 'timestamp', 'uid'))
-      ->values([$nid, $timestamp, $uid])
-      ->execute();
+    try {
+      $timestamp = time();
+      $query = $this->connection->insert('view_count1')
+        ->fields(array('nid', 'timestamp', 'uid'))
+        ->values([$nid, $timestamp, $uid])
+        ->execute();
+
+      if(!$query) {
+        throw new \Exception('Insert unnseccsesfull');
+      }
+    }
+    catch (\Exception $e) {
+      \Drupal::logger('view_count')->notice('Insert query failed');
+    }
   }
 }

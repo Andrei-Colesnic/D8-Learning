@@ -16,15 +16,15 @@ function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface
     $nid = \Drupal::routeMatch()->getRawParameter('node');
 
     // Get data for report on node.
-    $view_results = \Drupal::service('view_count.get_view_data_service');
-    $last_view = $view_results->getLastViewData($nid);
-    $all_views = $view_results->getAllViewData($nid);
-    $today_views = $view_results->getTodayViewData($nid);
+    $views_count_service = \Drupal::service('view_count.get_view_data_service');
+    $last_view = $views_count_service->getLastViewData($nid);
+    $all_views = $views_count_service->getAllViewData($nid);
+    $today_views = $views_count_service->getTodayViewData($nid);
 
-    // Insert data into db, if not anonymous user.
+    // Insert data into storage, if not anonymous user.
     if (!\Drupal::currentUser()->isAnonymous()) {
       $uid = \Drupal::currentUser()->id();
-      $view_results->setViewData($nid, $uid);
+      $views_count_service->setViewData($nid, $uid);
     }
 
     // Gather data for report on node page.
@@ -45,7 +45,7 @@ function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface
       '#weight' => -1,
     ];
 
-    // Disable caching for.
+    // Disable caching for full node view.
     $build['#cache']['max-age'] = 0;
   }
 }
