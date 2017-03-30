@@ -2,20 +2,30 @@
 
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\node\Entity\Node;
+use Drupal\user\Entity\User;
 use Drupal\view_count\GetViewDataService;
 
-function view_count_node_view(
-  array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
+/**
+ * @param array $build
+ * @param \Drupal\Core\Entity\EntityInterface $entity
+ * @param \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display
+ * @param $view_mode
+ */
+function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
   if ($view_mode === 'full') {
-
-    // Get data view count report input.
     $nid = \Drupal::routeMatch()->getRawParameter('node');
 
-    $view_results = new GetViewDataService;
+    // Get data for report on node.
+    $view_results = \Drupal::service('view_count.get_view_data_service');
     $last_view = $view_results->getLastViewData($nid);
     $all_views = $view_results->getAllViewData($nid);
     $today_views = $view_results->getTodayViewData($nid);
-    $view_results->setViewData($nid);
+
+    // Insert data into db, if not anonymous user.
+    if (!\Drupal::currentUser()->isAnonymous()) {
+      $uid = \Drupal::currentUser()->id();
+      $view_results->setViewData($nid, $uid);
+    }
 
     // Gather data for report on node page.
     $user_name = User::load($last_view['uid'])->getUsername();
@@ -34,5 +44,8 @@ function view_count_node_view(
         array('@user_name' => $user_name, '@access_time' => $access_time)),
       '#weight' => -1,
     ];
+
+    // Disable caching for.
+    $build['#cache']['max-age'] = 0;
   }
 }
