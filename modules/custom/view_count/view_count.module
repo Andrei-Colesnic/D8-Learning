@@ -14,12 +14,23 @@ use Drupal\view_count\ViewsCountService;
 function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
   if ($view_mode === 'full') {
     $nid = \Drupal::routeMatch()->getRawParameter('node');
+    $user_name = 'NoOne';
+    $access_time = 'Never';
+    $last_view = 0;
+    $all_views = 0;
+    $today_views = 0;
 
     // Get data for report on node.
     $views_count_service = \Drupal::service('view_count.get_view_data_service');
-    $last_view = $views_count_service->getLastViewData($nid);
-    $all_views = $views_count_service->getAllViewData($nid);
-    $today_views = $views_count_service->getTodayViewData($nid);
+    if ($last_stored_view = $views_count_service->getLastViewData($nid)) {
+      $last_view = $last_stored_view;
+    }
+    if ($all_stored_views = $views_count_service->getAllViewData($nid)) {
+      $all_views = $last_stored_view;
+    }
+    if ($today_stored_views = $views_count_service->getTodayViewData($nid)) {
+      $today_views = $last_stored_view;
+    }
 
     // Insert data into storage, if not anonymous user.
     if (!\Drupal::currentUser()->isAnonymous()) {
@@ -28,8 +39,10 @@ function view_count_node_view(array &$build, \Drupal\Core\Entity\EntityInterface
     }
 
     // Gather data for report on node page.
-    $user_name = User::load($last_view['uid'])->getUsername();
-    $access_time = date('m-d-Y', $last_view['timestamp']);
+    if ($last_view !== 0) {
+      $user_name = User::load($last_view['uid'])->getUsername();
+      $access_time = date('m-d-Y', $last_view['timestamp']);
+    }
 
     // Add fields to node page.
     $build['all_views'] = [
