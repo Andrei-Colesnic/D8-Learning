@@ -16,7 +16,7 @@ class GetViewDataService {
 
 
   /**
-   * When the service is created, set a value for the example variable.
+   * Set global value for storage connection.
    */
   public function __construct(Connection $connection) {
     $this->connection = $connection;
@@ -67,17 +67,17 @@ class GetViewDataService {
   public function setViewData($nid, $uid) {
     try {
       $timestamp = time();
-      $query = $this->connection->insert('view_count1')
+      $query = $this->connection->insert('view_count')
         ->fields(array('nid', 'timestamp', 'uid'))
         ->values([$nid, $timestamp, $uid])
         ->execute();
 
       if(!$query) {
-        throw new \Exception('Insert unnseccsesfull');
+        throw new \Exception('Insert unsuccessful');
       }
     }
     catch (\Exception $e) {
-      \Drupal::logger('view_count')->notice('Insert query failed');
+      watchdog_exception('view_count', $e);
     }
   }
 }
