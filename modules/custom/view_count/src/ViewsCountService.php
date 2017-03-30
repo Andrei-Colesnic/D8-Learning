@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\view_count\GetViewDataService.
+ * Contains \Drupal\view_count\ViewsCountService.
  */
 
 namespace Drupal\view_count;
@@ -10,7 +10,7 @@ namespace Drupal\view_count;
 
 use Drupal\Core\Database\Connection;
 
-class GetViewDataService {
+class ViewsCountService {
 
   protected $connection;
 

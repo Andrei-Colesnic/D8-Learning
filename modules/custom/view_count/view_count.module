@@ -3,7 +3,7 @@
 use Drupal\Component\Utility\UrlHelper;
 use Drupal\node\Entity\Node;
 use Drupal\user\Entity\User;
-use Drupal\view_count\GetViewDataService;
+use Drupal\view_count\ViewsCountService;
 
 /**
  * @param array $build
