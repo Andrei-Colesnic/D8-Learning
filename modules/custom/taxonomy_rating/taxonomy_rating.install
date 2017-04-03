@@ -1,0 +1,32 @@
+<?php
+
+function taxonomy_rating_schema() {
+  $schema['taxonomy_node_rating'] = array(
+    'fields' => array(
+      'tid'       => array(
+        'type'     => 'int',
+        'not null' => TRUE,
+      ),
+      'nid'       => array(
+        'type'     => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('nid'),
+  );
+  $schema['taxonomy_comment_rating'] = array(
+    'fields' => array(
+      'tid'       => array(
+        'type'     => 'int',
+        'not null' => TRUE,
+      ),
+      'cid'       => array(
+        'type'     => 'int',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+
+  return $schema;
+}

@@ -1,0 +1,47 @@
+<?php
+
+use Drupal\taxonomy_rating\TaxonomyRatingService;
+
+/**
+ * Implements hook_entity_insert().
+ */
+function taxonomy_rating_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  $entity_id = $entity->id();
+  $entity_type = $entity->getEntityType()->id();
+  if ($entity_type === 'node') {
+    $tid = $taxonomy_rating_service->getTidFromNode($entity);
+    $taxonomy_rating_service->writeNodeRating($tid, $entity_id);
+    $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+  }
+  if ($entity_type === 'comment') {
+    $node = $taxonomy_rating_service->getNodeFromComment($entity);
+    if ($tid_from_node = $node->get('field_article_type')->getValue()) {
+      $tid = $tid_from_node[0]['target_id'];
+    }
+    $taxonomy_rating_service->writeCommentRating($tid, $entity_id);
+    $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+  }
+}
+
+/**
+ * Implements hook_entity_update().
+ */
+function taxonomy_rating_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  $entity_id = $entity->id();
+  $entity_type = $entity->getEntityType()->id();
+  if ($entity_type === 'node') {
+    $tid = $taxonomy_rating_service->getTidFromNode($entity);
+    $taxonomy_rating_service->writeNodeRating($tid, $entity_id);
+    $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+  }
+  if ($entity_type === 'comment') {
+    $node = $taxonomy_rating_service->getNodeFromComment($entity);
+    if ($tid_from_node = $node->get('field_article_type')->getValue()) {
+      $tid = $tid_from_node[0]['target_id'];
+    }
+    $taxonomy_rating_service->writeCommentRating($tid, $entity_id);
+    $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+  }
+}

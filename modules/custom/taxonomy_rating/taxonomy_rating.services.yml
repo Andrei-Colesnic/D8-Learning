@@ -1,0 +1,5 @@
+services:
+  taxonomy_rating.taxonomy_rating_service:
+    class: Drupal\taxonomy_rating\TaxonomyRatingService
+    arguments: ['@database', '@entity_type.manager']
+
