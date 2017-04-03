@@ -25,10 +25,29 @@ class TaxonomyRatingService {
     $this->entity_manager = $entity_manager;
   }
 
+  public function calculateTaxonomyRating($entity) {
+    $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+    $entity_id = $entity->id();
+    $entity_type = $entity->getEntityType()->id();
+    if ($entity_type === 'node') {
+      $tid = $taxonomy_rating_service->getTidFromNode($entity);
+      $taxonomy_rating_service->writeNodeRating($tid, $entity_id);
+      $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+    }
+    if ($entity_type === 'comment') {
+      $node = $taxonomy_rating_service->getNodeFromComment($entity);
+      if ($tid_from_node = $node->get('field_article_type')->getValue()) {
+        $tid = $tid_from_node[0]['target_id'];
+      }
+      $taxonomy_rating_service->writeCommentRating($tid, $entity_id);
+      $taxonomy_rating_service->writeRatingToTaxonomy($tid);
+    }
+  }
+
   /**
    * Write Node rating data to storage.
    */
-  public function writeNodeRating($tid, $nid) {
+  private function writeNodeRating($tid, $nid) {
     try {
       $query = $this->connection->upsert('taxonomy_node_rating');
       $query->fields(['tid', 'nid',]);
@@ -48,7 +67,7 @@ class TaxonomyRatingService {
   /**
    * Write Comment rating data to storage.
    */
-  public function writeCommentRating($tid, $cid) {
+  private function writeCommentRating($tid, $cid) {
     try {
       $query = $this->connection->upsert('taxonomy_comment_rating');
       $query->fields(['tid', 'cid',]);
@@ -68,7 +87,7 @@ class TaxonomyRatingService {
   /**
    * Write calculated data to taxonomy.
    */
-  public function writeRatingToTaxonomy($tid) {
+  private function writeRatingToTaxonomy($tid) {
     // Get all views for node.
     $query = $this->connection->select('taxonomy_node_rating', 'tnr');
     $query->fields('tnr', ['tid', 'nid']);
@@ -92,7 +111,7 @@ class TaxonomyRatingService {
   /**
    * Get Node Entity from comment.
    */
-  public function getNodeFromComment($entity) {
+  private function getNodeFromComment($entity) {
     $nid = $entity->get('entity_id')->target_id;
     $entity_manager = $this->entity_manager;
     return $entity_manager->getStorage('node')->load($nid);
@@ -101,7 +120,7 @@ class TaxonomyRatingService {
   /**
    * Get Tid from Node.
    */
-  public function getTidFromNode($entity) {
+  private function getTidFromNode($entity) {
     $tid = 0;
     if ($tid_from_node = $entity->get('field_article_type')->getValue()) {
       $tid = $tid_from_node[0]['target_id'];
