@@ -25,13 +25,15 @@ class TaxonomyRatingService {
     $this->entity_manager = $entity_manager;
   }
 
+  /**
+   * Public function for handling Taxonomy Rating.
+   */
   public function calculateTaxonomyRating($entity) {
     $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
     $entity_id = $entity->id();
     $entity_type = $entity->getEntityType()->id();
     if ($entity_type === 'node') {
       $tid = $taxonomy_rating_service->getTidFromNode($entity);
-      $taxonomy_rating_service->writeNodeRating($tid, $entity_id);
       $taxonomy_rating_service->writeRatingToTaxonomy($tid);
     }
     if ($entity_type === 'comment') {
@@ -41,26 +43,6 @@ class TaxonomyRatingService {
       }
       $taxonomy_rating_service->writeCommentRating($tid, $entity_id);
       $taxonomy_rating_service->writeRatingToTaxonomy($tid);
-    }
-  }
-
-  /**
-   * Write Node rating data to storage.
-   */
-  private function writeNodeRating($tid, $nid) {
-    try {
-      $query = $this->connection->upsert('taxonomy_node_rating');
-      $query->fields(['tid', 'nid',]);
-      $query->values([$tid, $nid,]);
-      $query->key('nid');
-      $query->execute();
-
-      if(!$query) {
-        throw new \Exception('Insert unsuccessful');
-      }
-    }
-    catch (\Exception $e) {
-      watchdog_exception('taxonomy_node_rating', $e);
     }
   }
 
@@ -89,9 +71,9 @@ class TaxonomyRatingService {
    */
   private function writeRatingToTaxonomy($tid) {
     // Get all views for node.
-    $query = $this->connection->select('taxonomy_node_rating', 'tnr');
-    $query->fields('tnr', ['tid', 'nid']);
-    $query->condition('tnr.tid', $tid);
+    $query = $this->connection->select('taxonomy_index', 'ti');
+    $query->fields('ti', ['tid', 'nid']);
+    $query->condition('ti.tid', $tid);
     $node_count_result = $query->countQuery()->execute();
     $node_count_value = $node_count_result->fetchField();
 
