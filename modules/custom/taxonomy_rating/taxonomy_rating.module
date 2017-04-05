@@ -1,0 +1,45 @@
+<?php
+
+use Drupal\comment\CommentInterface;
+use Drupal\node\NodeInterface;
+use Drupal\taxonomy_rating\TaxonomyRatingService;
+
+/**
+ * Implements hook_node_insert().
+ */
+function taxonomy_rating_node_insert(NodeInterface $node) {
+  _count_tid_rating_from_node($node);
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function taxonomy_rating_node_update(NodeInterface $node) {
+  _count_tid_rating_from_node($node);
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function taxonomy_rating_comment_insert(CommentInterface $comment) {
+  $node = $comment->getCommentedEntity();
+  _count_tid_rating_from_node($node);
+}
+
+/**
+ * Implements hook_comment_update().
+ */
+function taxonomy_rating_comment_update(CommentInterface $comment) {
+  $node = $comment->getCommentedEntity();
+  _count_tid_rating_from_node($node);
+}
+
+/**
+ * Helper function for retrieving taxonomy rating from node.
+ */
+function _count_tid_rating_from_node(NodeInterface $node) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  if ($tid = $node->field_article_type->target_id) {
+    $taxonomy_rating_service->calculateTaxonomyRating($tid);
+  }
+}
