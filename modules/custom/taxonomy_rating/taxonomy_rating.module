@@ -6,40 +6,46 @@ use Drupal\taxonomy_rating\TaxonomyRatingService;
  * Implements hook_node_insert().
  */
 function taxonomy_rating_node_insert(Drupal\Core\Entity\EntityInterface $node) {
-  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-  if ($tid = $node->get('field_article_type')->getValue()) {
-    $taxonomy_rating_service->calculateTaxonomyRating($node);
-  }
+  _count_tid_rating_from_node($node);
 }
 
 /**
  * Implements hook_node_update().
  */
-function taxonomy_rating_node_update(Drupal\Core\Entity\EntityInterface $node) {
-  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-  if ($tid = $node->get('field_article_type')->getValue()) {
-    $taxonomy_rating_service->calculateTaxonomyRating($node);
-  }
+function taxonomy_rating_node_update($node) {
+  _count_tid_rating_from_node($node);
 }
 
 /**
  * Implements hook_comment_insert().
  */
-function taxonomy_rating_comment_insert(Drupal\comment\Comment $comment) {
-  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-  $node = $taxonomy_rating_service->getNodeFromComment($comment);
-  if ($tid = $node->get('field_article_type')->getValue()) {
-    $taxonomy_rating_service->calculateTaxonomyRating($node);
-  }
+function taxonomy_rating_comment_insert($comment) {
+  $node = _get_node_from_comment($comment);
+  _count_tid_rating_from_node($node);
 }
 
 /**
  * Implements hook_comment_update().
  */
-function taxonomy_rating_comment_update(Drupal\comment\Comment $comment) {
+function taxonomy_rating_comment_update($comment) {
+  $node = _get_node_from_comment($comment);
+  _count_tid_rating_from_node($node);
+}
+
+/**
+ * Helper function for retrieving taxonomy rating from node.
+ */
+function _count_tid_rating_from_node($node) {
   $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-  $node = $taxonomy_rating_service->getNodeFromComment($comment);
   if ($tid = $node->get('field_article_type')->getValue()) {
-    $taxonomy_rating_service->calculateTaxonomyRating($node);
+    $taxonomy_rating_service->calculateTaxonomyRating($tid);
   }
+}
+
+/**
+ * Helper function for getting Node entity from comment id.
+ */
+function _get_node_from_comment($comment) {
+  $nid = $comment->entity_id->target_id;
+  return \Drupal::entityTypeManager()->getStorage('node')->load($nid);
 }
