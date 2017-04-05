@@ -3,16 +3,43 @@
 use Drupal\taxonomy_rating\TaxonomyRatingService;
 
 /**
- * Implements hook_entity_insert().
+ * Implements hook_node_insert().
  */
-function taxonomy_rating_entity_insert(Drupal\Core\Entity\EntityInterface $entity) {
-  taxonomy_rating_entity_update($entity);
+function taxonomy_rating_node_insert(Drupal\Core\Entity\EntityInterface $node) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  if ($tid = $node->get('field_article_type')->getValue()) {
+    $taxonomy_rating_service->calculateTaxonomyRating($node);
+  }
 }
 
 /**
- * Implements hook_entity_update().
+ * Implements hook_node_update().
  */
-function taxonomy_rating_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+function taxonomy_rating_node_update(Drupal\Core\Entity\EntityInterface $node) {
   $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-  $taxonomy_rating_service->calculateTaxonomyRating($entity);
+  if ($tid = $node->get('field_article_type')->getValue()) {
+    $taxonomy_rating_service->calculateTaxonomyRating($node);
+  }
+}
+
+/**
+ * Implements hook_comment_insert().
+ */
+function taxonomy_rating_comment_insert(Drupal\comment\Comment $comment) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  $node = $taxonomy_rating_service->getNodeFromComment($comment);
+  if ($tid = $node->get('field_article_type')->getValue()) {
+    $taxonomy_rating_service->calculateTaxonomyRating($node);
+  }
+}
+
+/**
+ * Implements hook_comment_update().
+ */
+function taxonomy_rating_comment_update(Drupal\comment\Comment $comment) {
+  $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
+  $node = $taxonomy_rating_service->getNodeFromComment($comment);
+  if ($tid = $node->get('field_article_type')->getValue()) {
+    $taxonomy_rating_service->calculateTaxonomyRating($node);
+  }
 }

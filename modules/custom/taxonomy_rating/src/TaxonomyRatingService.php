@@ -26,60 +26,21 @@ class TaxonomyRatingService {
   }
 
   /**
-   * Public function for handling Taxonomy Rating.
-   */
-  public function calculateTaxonomyRating($entity) {
-    $taxonomy_rating_service = \Drupal::service('taxonomy_rating.taxonomy_rating_service');
-    $entity_id = $entity->id();
-    $entity_type = $entity->getEntityType()->id();
-    if ($entity_type === 'node') {
-      $tid = $taxonomy_rating_service->getTidFromNode($entity);
-      $taxonomy_rating_service->writeRatingToTaxonomy($tid);
-    }
-    if ($entity_type === 'comment') {
-      $node = $taxonomy_rating_service->getNodeFromComment($entity);
-      if ($tid_from_node = $node->get('field_article_type')->getValue()) {
-        $tid = $tid_from_node[0]['target_id'];
-      }
-      $taxonomy_rating_service->writeCommentRating($tid, $entity_id);
-      $taxonomy_rating_service->writeRatingToTaxonomy($tid);
-    }
-  }
-
-  /**
-   * Write Comment rating data to storage.
-   */
-  private function writeCommentRating($tid, $cid) {
-    try {
-      $query = $this->connection->upsert('taxonomy_comment_rating');
-      $query->fields(['tid', 'cid',]);
-      $query->values([$tid, $cid,]);
-      $query->key('cid');
-      $query->execute();
-
-      if(!$query) {
-        throw new \Exception('Insert unsuccessful');
-      }
-    }
-    catch (\Exception $e) {
-      watchdog_exception('taxonomy_comment_rating', $e);
-    }
-  }
-
-  /**
    * Write calculated data to taxonomy.
    */
-  private function writeRatingToTaxonomy($tid) {
-    // Get all views for node.
+  public function calculateTaxonomyRating($tid) {
+    // Get Node counts.
     $query = $this->connection->select('taxonomy_index', 'ti');
     $query->fields('ti', ['tid', 'nid']);
     $query->condition('ti.tid', $tid);
     $node_count_result = $query->countQuery()->execute();
     $node_count_value = $node_count_result->fetchField();
 
-    $query = $this->connection->select('taxonomy_comment_rating', 'tcr');
-    $query->fields('tcr', ['tid', 'cid']);
-    $query->condition('tcr.tid', $tid);
+    // Get corresponding comments for attached Nodes.
+    $query = $this->connection->select('taxonomy_index', 'ti');
+    $query->fields('ti', ['tid', 'nid']);
+    $query->condition('ti.tid', $tid);
+    $query->leftJoin('comment_field_data', 'cfd', 'ti.nid = cfd.entity_id');
     $comment_count_result = $query->countQuery()->execute();
     $comment_count_value = $comment_count_result->fetchField();
 
@@ -93,21 +54,10 @@ class TaxonomyRatingService {
   /**
    * Get Node Entity from comment.
    */
-  private function getNodeFromComment($entity) {
+  public function getNodeFromComment($entity) {
     $nid = $entity->get('entity_id')->target_id;
     $entity_manager = $this->entity_manager;
     return $entity_manager->getStorage('node')->load($nid);
-  }
-
-  /**
-   * Get Tid from Node.
-   */
-  private function getTidFromNode($entity) {
-    $tid = 0;
-    if ($tid_from_node = $entity->get('field_article_type')->getValue()) {
-      $tid = $tid_from_node[0]['target_id'];
-    }
-    return $tid;
   }
 
 }
