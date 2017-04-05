@@ -45,8 +45,7 @@ class TaxonomyRatingService {
     $comment_count_value = $comment_count_result->fetchField();
 
     $rating = $node_count_value * 5 + $comment_count_value * 0.1;
-    $entity_manager = $this->entity_manager;
-    $term = $entity_manager->getStorage('taxonomy_term')->load($tid);
+    $term = $this->entity_manager->getStorage('taxonomy_term')->load($tid);
     $term->field_rating->setValue($rating);
     $term->save();
   }
