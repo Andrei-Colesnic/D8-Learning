@@ -1,0 +1,12 @@
+taxonomy_rating.rating_config:
+  title: 'Taxonomy Rating Config'
+  parent: taxonomy_rating.admin_config_taxonomy_rating
+  description: 'Define and modify boosting parameters for Taxonomy rating.'
+  route_name: taxonomy_rating.rating_config
+  weight: -16
+taxonomy_rating.admin_config_taxonomy_rating:
+  title: 'Taxonomy Rating Config'
+  route_name: taxonomy_rating.admin_config_taxonomy_rating
+  parent: system.admin_config
+  description: 'Configure taxonomy rating multiplier values.'
+  weight: -15
