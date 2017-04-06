@@ -1,0 +1,15 @@
+taxonomy_rating.rating_config:
+  path: '/admin/config/rating_config/taxonomy_rating'
+  defaults:
+   _title: 'Taxonomy Rating Settings'
+   _form: '\Drupal\taxonomy_rating\Form\TaxonomyForm'
+  requirements:
+    _permission: 'administer taxonomy_rating'
+
+taxonomy_rating.admin_config_taxonomy_rating:
+  path: '/admin/config/rating_config'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Rating Config'
+  requirements:
+    _permission: 'access administration pages'
