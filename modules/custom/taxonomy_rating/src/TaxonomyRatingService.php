@@ -23,8 +23,8 @@ class TaxonomyRatingService {
    */
   public function __construct(Connection $connection, EntityTypeManager $entity_manager, ConfigFactory $config_factory) {
     $this->connection = $connection;
-    $this->entity_manager = $entity_manager;
-    $this->config_factory = $config_factory;
+    $this->entityManager = $entity_manager;
+    $this->configFactory = $config_factory;
   }
 
   /**

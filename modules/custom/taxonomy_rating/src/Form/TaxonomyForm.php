@@ -34,13 +34,13 @@ class TaxonomyForm extends ConfigFormBase {
     $config = $this->config('taxonomy_rating.multiplier');
     $form['node_multiplier'] = array(
       '#type'          => 'textfield',
-      '#title'         => t('Node config multiplier'),
+      '#title'         => $this->t('Node config multiplier'),
       '#required'      => TRUE,
       '#default_value' => $config->get('node_multiplier'),
     );
     $form['comment_multiplier'] = array(
       '#type'          => 'textfield',
-      '#title'         => t('Comment config multiplier'),
+      '#title'         => $this->t('Comment config multiplier'),
       '#required'      => TRUE,
       '#default_value' => $config->get('comment_multiplier'),
     );
@@ -69,7 +69,6 @@ class TaxonomyForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $this->config('taxonomy_rating.multiplier')
-      // Remove unchecked types.
       ->set('node_multiplier', $form_state->getValue('node_multiplier'))
       ->set('comment_multiplier', $form_state->getValue('comment_multiplier'))
       ->save();
